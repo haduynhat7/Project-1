@@ -1,5 +1,6 @@
 package pages;
 
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -10,15 +11,19 @@ import utils.Logs;
 import utils.Waits;
 import java.util.List;
 
-
 public class SearchPage {
-    @FindBy(xpath = "//div[@class='oxd-table-filter']//input")
-    List<WebElement> srchInputs;
+    // Explicit XPath for Employee Name Search
+    @FindBy(xpath = "//label[contains(normalize-space(), 'Employee Name')]/ancestor::div[contains(@class, 'oxd-input-group')]//input")
+    WebElement inpSpecificEmployeeName;
+
+    // Explicit XPath for Employee Id Search
+    @FindBy(xpath = "//label[contains(normalize-space(), 'Employee Id')]/ancestor::div[contains(@class, 'oxd-input-group')]//input")
+    WebElement inpSpecificEmployeeId;
 
     @FindBy(xpath = "//button[text()=' Search ']")
     WebElement btnSearch;
 
-    @FindBy(xpath = "//div/span[text()]")
+    @FindBy(xpath = "//span[contains(@class, 'oxd-text') and contains(normalize-space(), 'Found')]")
     WebElement labelUserFound;
 
     @FindBy(xpath = "//div[contains(@class, 'oxd-table-cell')]")
@@ -32,62 +37,44 @@ public class SearchPage {
         this.driver = driver;
         wait = Browser.getWaits(ConfigReader.getTimeOuts());
     }
-    public void enterName(String name)  {
-        wait.waitToBeVisibleAllElements(srchInputs);
-        wait.waitToBeVisible(srchInputs.get(0));
-        WebElement inpEmployeeName = srchInputs.get(0);
 
-        wait.waitToBeDisplayed(inpEmployeeName);
+    public void enterName(String name)  {
+        wait.waitToBeDisplayed(inpSpecificEmployeeName);
         Logs.info("Entering name in the employee name search field");
-        inpEmployeeName.sendKeys(name);
+
+        inpSpecificEmployeeName.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+        inpSpecificEmployeeName.sendKeys(Keys.DELETE);
+        try { Thread.sleep(500); } catch (Exception e) {}
+
+        inpSpecificEmployeeName.sendKeys(name);
     }
 
     public void enterId(String id)  {
-        wait.waitToBeVisibleAllElements(srchInputs);
-        wait.waitToBeVisible(srchInputs.get(1));
-        WebElement inpEmployeeId = srchInputs.get(1);
-        wait.waitToBeDisplayed(inpEmployeeId);
+        wait.waitToBeDisplayed(inpSpecificEmployeeId);
         Logs.info("Entering employee id in the search field");
-        inpEmployeeId.sendKeys(id);
 
+        inpSpecificEmployeeId.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+        inpSpecificEmployeeId.sendKeys(Keys.DELETE);
+        try { Thread.sleep(500); } catch (Exception e) {}
+
+        inpSpecificEmployeeId.sendKeys(id);
     }
 
     public void clickOnSearchBtn() {
-        try{
-            Thread.sleep(4000);
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-
-        Logs.info("Clicking the search button");
+        try { Thread.sleep(2000); } catch (Exception e){}
         wait.waitToBeDisplayed(btnSearch);
         btnSearch.click();
-
-        try{
-            Thread.sleep(4000);
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }
+        try { Thread.sleep(3000); } catch (Exception e){}
     }
 
     public String getUserFoundTxt(){
-        Logs.info("Getting the 'User Found' label");
-        wait.waitToBeVisible(labelUserFound);
         wait.waitToBeDisplayed(labelUserFound);
         return labelUserFound.getText();
     }
 
     public void clickOnFirstRecord() {
-        Logs.info("Clicking on the first record");
         wait.waitToBeVisibleAllElements(userRecords);
-        wait.waitToBeDisplayed(userRecords.get(1));
-        wait.waitToBeClickable(userRecords.get(1));
         userRecords.get(1).click();
-        try{
-            Thread.sleep(5000);
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-
+        try { Thread.sleep(3000); } catch (Exception e){}
     }
 }

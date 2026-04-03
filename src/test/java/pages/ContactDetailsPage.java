@@ -19,11 +19,13 @@ public class ContactDetailsPage {
 
     @FindBy(xpath = "//i[contains(@class, 'arrow')]")
     WebElement arrwBtnCountry;
+
     @FindBy(xpath = "//div[contains(@class, 'oxd-select-text-input')]")
     WebElement inpCountryTxt;
 
     @FindBy(xpath = "//input[contains(@class, 'oxd-input')]")
     List<WebElement> inputs;
+
     private WebDriver driver;
     private Waits wait;
 
@@ -35,28 +37,24 @@ public class ContactDetailsPage {
 
     public void enterStreet1(String street){
         wait.waitToBeVisibleAllElements(inputs);
-        Logs.info("Entering street");
         WebElement inpStreet1 = inputs.get(1);
         inpStreet1.sendKeys(street);
     }
 
     public void enterCity(String city){
         wait.waitToBeVisibleAllElements(inputs);
-        Logs.info("Entering state");
         WebElement inpCity = inputs.get(3);
         inpCity.sendKeys(city);
     }
 
     public void enterStateProvince(String state){
         wait.waitToBeVisibleAllElements(inputs);
-        Logs.info("Entering state");
         WebElement stateProvince = inputs.get(4);
         stateProvince.sendKeys(state);
     }
 
     public void enterZipCode(String zip){
         wait.waitToBeVisibleAllElements(inputs);
-        Logs.info("Enter zip code");
         WebElement zipCode = inputs.get(5);
         zipCode.sendKeys(zip);
     }
@@ -64,34 +62,52 @@ public class ContactDetailsPage {
     public void selectCountry(String country) {
         wait.waitToBeVisible(arrwBtnCountry);
         wait.waitToBeVisible(inpCountryTxt);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", arrwBtnCountry);
-        arrwBtnCountry.click();
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", arrwBtnCountry);
+
+        try {
+            arrwBtnCountry.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", arrwBtnCountry);
+        }
+
         String countryName ="";
         while(!countryName.contains(country)){
             inpCountryTxt.sendKeys(Keys.ARROW_DOWN);
             countryName = inpCountryTxt.getText();
         }
-        arrwBtnCountry.click();
+
+        try {
+            arrwBtnCountry.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", arrwBtnCountry);
+        }
     }
 
     public void enterEmail(String email){
         wait.waitToBeVisibleAllElements(inputs);
         WebElement inpEmail = inputs.get(9);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", inpEmail);
-        Logs.info("CLicking on email input field");
-        inpEmail.click();
-        Logs.info("Clearing the input field");
-        inpEmail.clear();
-        Logs.info("Entering email address int he input field");
-        inpEmail.sendKeys(email);
 
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", inpEmail);
+
+        try {
+            inpEmail.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", inpEmail);
+        }
+
+        inpEmail.clear();
+        inpEmail.sendKeys(email);
     }
 
     public void clickOnSaveBtn(){
         wait.waitToBeVisible(btnSave);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", btnSave);
-        Logs.info("Clicking on save button");
-        btnSave.click();
-    }
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", btnSave);
 
+        try {
+            btnSave.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnSave);
+        }
+    }
 }

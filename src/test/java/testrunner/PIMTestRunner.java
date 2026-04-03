@@ -31,7 +31,6 @@ public class PIMTestRunner extends BaseTest {
         logoutPage = new LogoutPage(driver);
         sidePnlPage = new SidePanelPage(driver);
         contactPage = new ContactDetailsPage(driver);
-
     }
 
     @Test(priority = 1, description = "Adding first employee")
@@ -62,6 +61,7 @@ public class PIMTestRunner extends BaseTest {
         Utils.addJsonArray(firstName, lastName, userName, password);
 
     }
+
     @Test(priority = 2, description = "Adding second employee")
     public void addSecondEmployee() {
         pimPage.clickOnPIMFromDashboard();
@@ -98,7 +98,7 @@ public class PIMTestRunner extends BaseTest {
         srchPage.clickOnSearchBtn();
 
         String isUserFound_actual = srchPage.getUserFoundTxt();
-        System.out.println(isUserFound_actual);
+        System.out.println("Search by Name result: " + isUserFound_actual);
 
         String isUserFound_expected = "Record Found";
         Assert.assertTrue(isUserFound_actual.contains(isUserFound_expected), "Record not found");
@@ -116,6 +116,14 @@ public class PIMTestRunner extends BaseTest {
         String id =""+RandomInfoUtils.getUserId();
         prsonalDtlsPage.enterEmployeedId(id);
         prsonalDtlsPage.clickOnPersonalDtlsSaveBtn();
+
+        // Them thoi gian cho de DB cua OrangeHRM kip cap nhat ID moi
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         Utils.updateProperty(fileLocation, jsonId-2, "userid", id);
     }
 
@@ -125,14 +133,21 @@ public class PIMTestRunner extends BaseTest {
         int jsonId = Utils.getUserJsonIdx(fileLocation);
 
         pimPage.clickOnEmployeeListBtn();
+
+        // Refresh trang de dam bao form tim kiem khong bi luu cache ten tu test case truoc
+        driver.navigate().refresh();
+
         String userId = Utils.getProperty(fileLocation, jsonId-2, "userid");
         srchPage.enterId(userId);
         srchPage.clickOnSearchBtn();
 
         String isUserFound_actual = srchPage.getUserFoundTxt();
+        System.out.println("Search by ID result: " + isUserFound_actual);
+
         String isUserFound_expected = "Record Found";
-        Assert.assertTrue(isUserFound_actual.contains(isUserFound_expected), "User not found by id");
+        Assert.assertTrue(isUserFound_actual.contains(isUserFound_expected), "Error: Expected 'Record Found' but actual text was: " + isUserFound_actual);
     }
+
     @Test(priority = 6, description = "Logout")
     public void doLogOut(){
         logoutPage.clickOnUserDropdownBtn();
@@ -170,6 +185,7 @@ public class PIMTestRunner extends BaseTest {
         prsonalDtlsPage.selectGenderType(type);
         prsonalDtlsPage.clickOnPersonalDtlsSaveBtn();
         Utils.updateProperty(fileLocation, jsonId-1, "gendertype", type);
+
         String bloodType ="AB+";
         prsonalDtlsPage.selectBloodType(bloodType);
         prsonalDtlsPage.clickOnCustomFieldsSaveBtn();
@@ -211,5 +227,4 @@ public class PIMTestRunner extends BaseTest {
         Utils.updateProperty(fileLocation, jsonId-1, "country", country);
         Utils.updateProperty(fileLocation, jsonId-1, "email", email);
     }
-
 }

@@ -2,10 +2,6 @@
 .idea
 allure-results
 build
-gradle
 logs
 allure-report
 screenshot
-gradlew.bat
-gradlew
-settings.gradle
