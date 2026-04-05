@@ -40,9 +40,11 @@ public class BrowserFactory {
                 chromeOptions.addArguments("--disable-backgrounding-occluded-windows");
 
                 //jenkins
-                chromeOptions.addArguments("--headless");
-                chromeOptions.addArguments("--window-size=1920,1080");
-                chromeOptions.addArguments("--disable-gpu");
+                chromeOptions.addArguments("--headless=new"); // Chạy ngầm (dùng chuẩn mới của Chrome)
+                chromeOptions.addArguments("--window-size=1920,1080"); // Ép màn hình to bằng Full HD để không bị giấu menu
+                chromeOptions.addArguments("--no-sandbox"); // Bỏ qua cơ chế bảo mật sandbox (Rất quan trọng trên Linux)
+                chromeOptions.addArguments("--disable-dev-shm-usage"); // Tránh lỗi tràn bộ nhớ (RAM) của Docker
+                chromeOptions.addArguments("--disable-gpu"); // Tắt tăng tốc phần cứng
 
                 if(browser_mode.equalsIgnoreCase("incognito")) {
                     chromeOptions.addArguments("--incognito");
