@@ -2,8 +2,8 @@ package utils;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.Proxy; // proxy
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.Proxy; // proxy
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -32,26 +32,25 @@ public class BrowserFactory {
                 //chromeOptions.setAcceptInsecureCerts(true);
                 //chromeOptions.addArguments("--ignore-certificate-errors");
 
-
                 chromeOptions.addArguments("--remote-allow-origins=*");
-                chromeOptions.addArguments("--no-sandbox");
-                chromeOptions.addArguments("--disable-dev-shm-usage");
-                chromeOptions.addArguments("--start-maximized");
                 chromeOptions.addArguments("--disable-backgrounding-occluded-windows");
 
-                //jenkins
-                chromeOptions.addArguments("--headless=new"); // Chạy ngầm (dùng chuẩn mới của Chrome)
-                chromeOptions.addArguments("--window-size=1920,1080"); // Ép màn hình to bằng Full HD để không bị giấu menu
-                chromeOptions.addArguments("--no-sandbox"); // Bỏ qua cơ chế bảo mật sandbox (Rất quan trọng trên Linux)
-                chromeOptions.addArguments("--disable-dev-shm-usage"); // Tránh lỗi tràn bộ nhớ (RAM) của Docker
-                chromeOptions.addArguments("--disable-gpu"); // Tắt tăng tốc phần cứng
+                // --- CAU HINH BAT BUOC CHO JENKINS DOCKER ---
+                chromeOptions.addArguments("--headless=new"); // Chay ngam
+                chromeOptions.addArguments("--window-size=1920,1080"); // Ep kich thuoc man hinh Full HD
+                chromeOptions.addArguments("--no-sandbox"); // Vuot bao mat sandbox tren Linux
+                chromeOptions.addArguments("--disable-dev-shm-usage"); // Tranh loi tran RAM
+                chromeOptions.addArguments("--disable-gpu"); // Tat tang toc phan cung
 
-                if(browser_mode.equalsIgnoreCase("incognito")) {
+                if(browser_mode != null && browser_mode.equalsIgnoreCase("incognito")) {
                     chromeOptions.addArguments("--incognito");
                 }
 
+                // Nap options vao ChromeDriver
                 driver = new ChromeDriver(chromeOptions);
-                driver.manage().window().maximize();
+
+                // LUU Y: Khong su dung driver.manage().window().maximize() khi chay Headless
+
                 driver.switchTo().defaultContent();
                 break;
 
@@ -59,15 +58,14 @@ public class BrowserFactory {
                 WebDriverManager.firefoxdriver().setup();
                 FirefoxOptions fireFoxOptions = new FirefoxOptions();
 
-                if(browser_mode.equalsIgnoreCase("incognito"))
+                if(browser_mode != null && browser_mode.equalsIgnoreCase("incognito"))
                     fireFoxOptions.addArguments("--incognito");
 
                 driver = new FirefoxDriver(fireFoxOptions);
                 break;
 
             default:
-                new RuntimeException("Invalid browser name " + name);
-                break;
+                throw new RuntimeException("Invalid browser name " + name);
         }
         return driver;
     }
