@@ -21,16 +21,16 @@ public class BrowserFactory {
                         .setup();
 
                 //THEM PROXY ZAP
-                Proxy proxy = new Proxy();
-                proxy.setHttpProxy("localhost:8081");
-                proxy.setSslProxy("localhost:8081");
+                //Proxy proxy = new Proxy();
+                //proxy.setHttpProxy("localhost:8081");
+                //proxy.setSslProxy("localhost:8081");
 
                 ChromeOptions chromeOptions = new ChromeOptions();
 
                 //GAN PROXY
-                chromeOptions.setProxy(proxy);
-                chromeOptions.setAcceptInsecureCerts(true);
-                chromeOptions.addArguments("--ignore-certificate-errors");
+                //chromeOptions.setProxy(proxy);
+                //chromeOptions.setAcceptInsecureCerts(true);
+                //chromeOptions.addArguments("--ignore-certificate-errors");
 
 
                 chromeOptions.addArguments("--remote-allow-origins=*");
@@ -38,6 +38,10 @@ public class BrowserFactory {
                 chromeOptions.addArguments("--disable-dev-shm-usage");
                 chromeOptions.addArguments("--start-maximized");
                 chromeOptions.addArguments("--disable-backgrounding-occluded-windows");
+
+                //jenkins
+                chromeOptions.addArguments("--headless");
+                chromeOptions.addArguments("--window-size=1920,1080");
 
                 if(browser_mode.equalsIgnoreCase("incognito")) {
                     chromeOptions.addArguments("--incognito");
