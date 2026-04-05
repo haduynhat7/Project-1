@@ -24,6 +24,9 @@ public class PIMTestRunner extends BaseTest {
     public void doLoginAsAdmin() {
         loginPage = new LoginPage(driver);
         loginPage.doLogin("Admin", "admin123");
+
+        try { Thread.sleep(3000); } catch (InterruptedException e) { e.printStackTrace(); }
+
         pimPage = new PIMPage(driver);
         srchPage = new SearchPage(driver);
         addEmpPage = new AddEmployeePage(driver);
@@ -165,6 +168,8 @@ public class PIMTestRunner extends BaseTest {
         String username = Utils.getProperty(fileLocation, jsonId-1, "username");
         String password = Utils.getProperty(fileLocation, jsonId-1, "password");
         loginPage.doLogin(username, password);
+
+        try { Thread.sleep(3000); } catch (InterruptedException e) { e.printStackTrace(); }
 
         String userDropdownName_actual = loginPage.getUserDropdownBtnName();
         String userDropdownName_expected = Utils.getProperty(fileLocation, jsonId-1, "firstname");;

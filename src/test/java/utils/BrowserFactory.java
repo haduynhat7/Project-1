@@ -42,6 +42,7 @@ public class BrowserFactory {
                 //jenkins
                 chromeOptions.addArguments("--headless");
                 chromeOptions.addArguments("--window-size=1920,1080");
+                chromeOptions.addArguments("--disable-gpu");
 
                 if(browser_mode.equalsIgnoreCase("incognito")) {
                     chromeOptions.addArguments("--incognito");
