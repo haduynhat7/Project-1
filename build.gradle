@@ -2,6 +2,9 @@ plugins {
     id 'java'
     // Them plugin allure de tao bao cao dep nhu cua thay
     id 'io.qameta.allure' version '2.11.2'
+
+    // --- THÊM MỚI BƯỚC 2 (SCA): Khai báo plugin OWASP Dependency-Check ---
+    id "org.owasp.dependencycheck" version "9.0.9"
 }
 
 group 'org.example'
@@ -44,4 +47,12 @@ test {
 // Cau hinh Allure Report
 allure {
     version = '2.18.1'
+}
+
+// --- THÊM MỚI BƯỚC 2 (SCA): Cấu hình luật cho OWASP Dependency-Check ---
+dependencyCheck {
+    // Điểm CVSS từ 0 đến 10. Mình cài > 7.0 (nghĩa là phát hiện lỗi Nghiêm trọng/Cao) thì đánh rớt Pipeline
+    failBuildOnCVSS = 7.0
+    // Xuất báo cáo ra định dạng HTML để bạn có thể tải về nộp cho thầy xem
+    formats = ['HTML', 'XML']
 }
