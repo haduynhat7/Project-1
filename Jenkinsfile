@@ -8,15 +8,19 @@ pipeline {
             }
         }
 
-        stage('2. SCA Scan (Snyk)') {
+stage('2. SCA Scan (Snyk)') {
             steps {
                 echo 'Đang chạy Snyk Security Scan...'
+
+                // 1. Cấp quyền thực thi cho Gradle ngay trước khi Snyk chạy
+                sh 'chmod +x gradlew'
+
+                // 2. Chạy Snyk (Đã gỡ bỏ --all-projects để quét đơn giản và chính xác hơn)
                 snykSecurity(
                     snykInstallation: 'snyk-cli',
                     snykTokenId: 'snyk-token',
                     targetFile: 'build.gradle',
-                    failOnIssues: false,
-                    additionalArguments: '--all-projects'
+                    failOnIssues: false
                 ) // <--- Lúc nãy bạn bị thiếu dấu đóng ngoặc tròn ở đây
             }
         }
