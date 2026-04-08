@@ -8,15 +8,16 @@ pipeline {
             }
         }
 
-    stage('2. SCA Scan (Snyk)') {
-                steps {
-                    echo 'Đang chạy Snyk Security Scan...'
-                    snykSecurity(
-                        snykInstallation: 'snyk-cli',
-                        snykTokenId: 'snyk-token',
-                        targetFile: 'build.gradle', // Chỉ quét các thư viện khai báo trong file này
-                        failOnIssues: false,        // Đặt false để Build không bị FAIL nếu phát hiện lỗi bảo mật (để bạn xem report trước)
-                        additionalArguments: '--all-projects'
+        stage('2. SCA Scan (Snyk)') {
+            steps {
+                echo 'Đang chạy Snyk Security Scan...'
+                snykSecurity(
+                    snykInstallation: 'snyk-cli',
+                    snykTokenId: 'snyk-token',
+                    targetFile: 'build.gradle',
+                    failOnIssues: false,
+                    additionalArguments: '--all-projects'
+                ) // <--- Lúc nãy bạn bị thiếu dấu đóng ngoặc tròn ở đây
             }
         }
 
