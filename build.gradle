@@ -59,5 +59,6 @@ dependencyCheck {
     // Thêm thẻ nvd và dán API Key của bạn vào đây
     nvd {
         apiKey = "880D9B94-5F33-F111-8369-129478FCB64D"
+        delay = 16000
     }
 }
