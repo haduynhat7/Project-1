@@ -1,9 +1,9 @@
 plugins {
     id 'java'
-    // Them plugin allure de tao bao cao dep nhu cua thay
+    // Plugin Allure để tạo báo cáo test UI
     id 'io.qameta.allure' version '2.11.2'
 
-    // --- THÊM MỚI BƯỚC 2 (SCA): Khai báo plugin OWASP Dependency-Check ---
+    // Plugin OWASP Dependency-Check để quét SCA (Bảo mật thư viện)
     id "org.owasp.dependencycheck" version "9.0.9"
 }
 
@@ -36,7 +36,6 @@ test {
         suites "/src/test/resources/test.xml"
     }
 
-    // --- DOAN CODE NAY GIUP JENKINS IN KET QUA TUNG BAI TEST ---
     testLogging {
         events "passed", "skipped", "failed"
         showStandardStreams = true
@@ -44,20 +43,24 @@ test {
     }
 }
 
-// Cau hinh Allure Report
 allure {
     version = '2.18.1'
 }
 
-// --- THÊM MỚI BƯỚC 2 (SCA): Cấu hình luật cho OWASP Dependency-Check ---
+// --- PHẦN SỬA ĐỔI ĐỂ CHỐNG LỖI 403 VÀ TREO PIPELINE ---
 dependencyCheck {
-    // Điểm CVSS từ 0 đến 10. Mình cài > 7.0 (nghĩa là phát hiện lỗi Nghiêm trọng/Cao) thì đánh rớt Pipeline
+    // Điểm CVSS > 7.0 sẽ đánh rớt Pipeline nếu quét thành công
     failBuildOnCVSS = 7.0
-    // Xuất báo cáo ra định dạng HTML để bạn có thể tải về nộp cho thầy xem
     formats = ['HTML', 'XML']
 
-    // Thêm thẻ nvd và dán API Key của bạn vào đây
+    // CỰC KỲ QUAN TRỌNG: Nếu lỗi kết nối NVD (403/404), vẫn cho phép chạy tiếp stage sau
+    failOnError = false
+
     nvd {
         apiKey = "880D9B94-5F33-F111-8369-129478FCB64D"
+
+        // Tăng thời gian giãn cách gọi API để tránh bị NVD chặn (tính bằng mili giây)
+        // 16000ms = 16 giây, mức an toàn nhất cho Jenkins/Docker
+        delay = 16000
     }
 }
