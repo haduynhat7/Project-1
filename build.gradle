@@ -55,4 +55,8 @@ dependencyCheck {
     failBuildOnCVSS = 7.0
     // Xuất báo cáo ra định dạng HTML để bạn có thể tải về nộp cho thầy xem
     formats = ['HTML', 'XML']
+
+    // Thêm thẻ nvd và dán API Key của bạn vào đây
+    nvd {
+        apiKey = "880D9B94-5F33-F111-8369-129478FCB64D"
 }
