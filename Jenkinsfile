@@ -15,7 +15,7 @@ pipeline {
                 // 1. Cấp quyền thực thi cho Gradle ngay trước khi Snyk chạy
                 sh 'chmod +x gradlew'
 
-                // 2. Chạy Snyk (Đã gỡ bỏ --all-projects để quét đơn giản và chính xác hơn)
+                // 2. Chạy Snyk
                 snykSecurity(
                     snykInstallation: 'snyk-cli',
                     snykTokenId: 'snyk-token',
@@ -78,6 +78,11 @@ pipeline {
 
             // Đính kèm file báo cáo của CodeQL để tải về từ Jenkins
             archiveArtifacts artifacts: 'codeql-results.sarif', allowEmptyArchive: true
+
+            // THÊM MỚI: Lệnh gọi Plugin hiển thị biểu đồ SARIF
+                        recordIssues(
+                            tools: [sarif(pattern: 'codeql-results.sarif')],
+                            qualityGates: [[threshold: 1, type: 'TOTAL', criticality: 'NOTE']]
         }
     }
 }
