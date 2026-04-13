@@ -44,7 +44,7 @@ pipeline {
                     sh '''
                         export PATH=$PATH:$(pwd)/codeql
                         echo "Tạo CodeQL Database..."
-                        codeql database create codeql-db --language=java --command="./gradlew clean classes" --overwrite
+                        codeql database create codeql-db --language=java --command="./gradlew clean testClasses" --overwrite
                     '''
 
                     // 3. Phân tích Database và xuất kết quả ra file .sarif
