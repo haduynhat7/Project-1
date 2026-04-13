@@ -83,6 +83,7 @@ pipeline {
                         recordIssues(
                             tools: [sarif(pattern: 'codeql-results.sarif')],
                             qualityGates: [[threshold: 1, type: 'TOTAL', criticality: 'NOTE']]
+                            )
         }
     }
 }
