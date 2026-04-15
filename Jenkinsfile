@@ -85,10 +85,10 @@ pipeline {
                 echo 'Bắt đầu chạy TestNG qua cổng ZAP Proxy (8090)...'
                 sh 'chmod +x gradlew'
 
-                // --- THÊM catchError VÀO ĐÂY ---
-                                // Nó sẽ bảo Jenkins: "Dù lệnh test có thất bại thì vẫn đánh dấu stage này là UNSTABLE (Màu vàng) chứ đừng đánh sập toàn bộ (FAILURE), để tôi còn đi tiếp tới Stage 6 lấy báo cáo!"
-                                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                                    sh './gradlew clean test'
+                // --- ĐÃ SỬA LẠI NGOẶC CHUẨN Ở ĐÂY ---
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    sh './gradlew clean test'
+                }
             }
         }
 
