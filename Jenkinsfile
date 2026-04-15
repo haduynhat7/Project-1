@@ -60,7 +60,7 @@ pipeline {
                 script {
                     echo 'Đang thiết lập và khởi động OWASP ZAP...'
 
-                    // 1. Tải ZAP 2.16.0 (Đã sửa link chuẩn)
+                    // 1. Tải ZAP 2.16.0 (Bản chuẩn mới nhất)
                     sh '''
                         if [ ! -d "ZAP_2.16.0" ]; then
                             echo "Lần đầu chạy: Đang tải phần mềm OWASP ZAP 2.16.0..."
@@ -69,21 +69,22 @@ pipeline {
                         fi
                     '''
 
-                    // 2. Chạy ZAP ngầm
-                    echo "Khởi động OWASP ZAP Proxy ở cổng 8080..."
-                    sh 'nohup ./ZAP_2.16.0/zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true > zap.log 2>&1 &'
+                    // 2. Chạy ZAP ngầm ở cổng 8090 (Tránh đụng cổng 8080 của Jenkins)
+                    echo "Khởi động OWASP ZAP Proxy ở cổng 8090..."
+                    sh 'nohup ./ZAP_2.16.0/zap.sh -daemon -host 0.0.0.0 -port 8090 -config api.disablekey=true > zap.log 2>&1 &'
 
-                    echo 'Chờ 30 giây để công cụ ZAP khởi động lên hoàn toàn...'
-                    sleep 30
+                    // 3. Chờ 45 giây để ZAP nạp xong toàn bộ cấu hình lõi
+                    echo 'Chờ 45 giây để công cụ ZAP khởi động lên hoàn toàn...'
+                    sleep 45
                 }
             }
         }
 
         stage('5. UI Automation Test (Selenium)') {
             steps {
-                echo 'Bắt đầu chạy TestNG qua cổng ZAP Proxy...'
+                echo 'Bắt đầu chạy TestNG qua cổng ZAP Proxy (8090)...'
                 sh 'chmod +x gradlew'
-                // Kịch bản Selenium sẽ chạy và đẩy data chui qua cổng 8080 của ZAP
+                // Kịch bản Selenium sẽ chạy và đẩy data chui qua cổng 8090 của ZAP
                 sh './gradlew clean test'
             }
         }
@@ -95,11 +96,11 @@ pipeline {
                     sleep 10
 
                     echo 'Đang trích xuất báo cáo DAST từ ZAP...'
-                    // Lấy báo cáo dạng HTML từ API của ZAP
+                    // Lấy báo cáo dạng HTML từ API của ZAP ở cổng 8090
                     sh 'curl -L http://localhost:8090/OTHER/core/other/htmlreport/? -o zap-report.html'
 
                     echo 'Ra lệnh tắt phần mềm OWASP ZAP...'
-                    // Gọi API lệnh tắt ZAP
+                    // Gọi API lệnh tắt ZAP an toàn
                     sh 'curl -s http://localhost:8090/JSON/core/action/shutdown/ || true'
                 }
             }
@@ -123,11 +124,10 @@ pipeline {
             )
         }
 
-        // Khối dọn dẹp cuối cùng
+        // Khối dọn dẹp cuối cùng: Cực kỳ quan trọng để dọn dẹp RAM và Port
         cleanup {
             script {
                 echo 'Kiểm tra an toàn: Đảm bảo tiến trình ZAP đã được tắt hẳn...'
-                // Đã cập nhật tên file jar theo bản 2.16.0
                 sh 'pkill -f zap.sh || true'
                 sh 'pkill -f zap-2.16.0.jar || true'
             }
