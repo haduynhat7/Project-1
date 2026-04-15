@@ -58,21 +58,32 @@ pipeline {
         stage('4. Start OWASP ZAP (DAST Proxy)') {
             steps {
                 script {
-                    echo 'Đang khởi động OWASP ZAP Proxy chạy ngầm...'
-                    // Khởi động ZAP qua Docker ở cổng 8080
-                    sh 'docker run -d -u root --name zap-proxy -p 8080:8080 -i ghcr.io/zaproxy/zaproxy:stable zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true'
+                    echo 'Đang thiết lập và khởi động OWASP ZAP...'
 
-                    echo 'Chờ 20 giây để ZAP khởi động hoàn tất...'
-                    sleep 20
+                    // 1. Tải ZAP nếu chưa có bản cài đặt cục bộ
+                    sh '''
+                        if [ ! -d "ZAP_2.15.0" ]; then
+                            echo "Lần đầu chạy: Đang tải phần mềm OWASP ZAP..."
+                            wget -q https://github.com/zaproxy/zaproxy/releases/download/v2.15.0/ZAP_2.15.0_Linux.tar.gz
+                            tar -xzf ZAP_2.15.0_Linux.tar.gz
+                        fi
+                    '''
+
+                    // 2. Chạy ZAP ngầm trực tiếp trên Linux (Không dùng Docker)
+                    echo "Khởi động OWASP ZAP Proxy ở cổng 8080..."
+                    sh 'nohup ./ZAP_2.15.0/zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true > zap.log 2>&1 &'
+
+                    echo 'Chờ 30 giây để công cụ ZAP khởi động lên hoàn toàn...'
+                    sleep 30
                 }
             }
         }
 
         stage('5. UI Automation Test (Selenium)') {
             steps {
-                echo 'Bắt đầu chạy TestNG qua ZAP Proxy...'
+                echo 'Bắt đầu chạy TestNG qua cổng ZAP Proxy...'
                 sh 'chmod +x gradlew'
-                // Kịch bản Selenium sẽ chạy và đẩy traffic qua cổng 8080
+                // Kịch bản Selenium sẽ chạy và đẩy data chui qua cổng 8080 của ZAP
                 sh './gradlew clean test'
             }
         }
@@ -80,16 +91,16 @@ pipeline {
         stage('6. DAST Report & Clean Up ZAP') {
             steps {
                 script {
-                    echo 'Đang trích xuất báo cáo DAST từ ZAP...'
-                    // Đợi 10 giây để ZAP xử lý xong các request cuối cùng
+                    echo 'Đang đợi ZAP xử lý các gói tin cuối cùng...'
                     sleep 10
 
-                    // Lấy báo cáo dạng HTML
+                    echo 'Đang trích xuất báo cáo DAST từ ZAP...'
+                    // Lấy báo cáo dạng HTML từ API của ZAP
                     sh 'curl -L http://localhost:8080/OTHER/core/other/htmlreport/? -o zap-report.html'
 
-                    echo 'Dọn dẹp Docker Container ZAP...'
-                    // Dừng và xóa ZAP
-                    sh 'docker stop zap-proxy && docker rm zap-proxy'
+                    echo 'Ra lệnh tắt phần mềm OWASP ZAP...'
+                    // Gọi API lệnh tắt ZAP một cách an toàn, thêm "|| true" để Pipeline không báo lỗi nếu ZAP lỡ tắt rồi
+                    sh 'curl -s http://localhost:8080/JSON/core/action/shutdown/ || true'
                 }
             }
         }
@@ -97,30 +108,28 @@ pipeline {
 
     post {
         always {
-            echo 'Đang xuất các báo cáo lên Jenkins...'
+            echo 'Đang tổng hợp và xuất các báo cáo lên giao diện Jenkins...'
 
-            // 1. Báo cáo Allure (Test Giao diện)
+            // 1. Báo cáo UI (Allure)
             allure includeProperties: false, results: [[path: 'build/allure-results']]
 
-            // 2. Lưu file gốc SARIF và HTML để có thể bấm tải về xem
+            // 2. Lưu file gốc (Cho phép user tải về)
             archiveArtifacts artifacts: 'codeql-results.sarif, zap-report.html', allowEmptyArchive: true
 
-            // 3. Cập nhật biểu đồ SARIF (Warnings NG Plugin) cho CodeQL
+            // 3. Hiển thị biểu đồ SARIF (SAST CodeQL)
             recordIssues(
                 tools: [sarif(pattern: 'codeql-results.sarif')],
                 qualityGates: [[threshold: 1, type: 'TOTAL', criticality: 'NOTE']]
             )
         }
 
-        // Khối dọn dẹp (Safety Net): Đảm bảo ZAP không bị "treo" nếu Selenium chạy lỗi giữa chừng
+        // Khối dọn dẹp cuối cùng: Rất quan trọng để các lần Build sau không bị kẹt cổng 8080
         cleanup {
             script {
-                echo 'Kiểm tra và dọn dẹp ZAP lần cuối (nếu còn sót)...'
-                sh '''
-                    if [ "$(docker ps -q -f name=zap-proxy)" ]; then
-                        docker stop zap-proxy && docker rm zap-proxy
-                    fi
-                '''
+                echo 'Kiểm tra an toàn: Đảm bảo tiến trình ZAP đã được tắt hẳn...'
+                // Ép tắt mọi tiến trình Java liên quan đến ZAP đang chạy
+                sh 'pkill -f zap.sh || true'
+                sh 'pkill -f zap-2.15.0.jar || true'
             }
         }
     }
