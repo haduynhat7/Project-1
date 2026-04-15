@@ -96,11 +96,11 @@ pipeline {
 
                     echo 'Đang trích xuất báo cáo DAST từ ZAP...'
                     // Lấy báo cáo dạng HTML từ API của ZAP
-                    sh 'curl -L http://localhost:8080/OTHER/core/other/htmlreport/? -o zap-report.html'
+                    sh 'curl -L http://localhost:8090/OTHER/core/other/htmlreport/? -o zap-report.html'
 
                     echo 'Ra lệnh tắt phần mềm OWASP ZAP...'
                     // Gọi API lệnh tắt ZAP
-                    sh 'curl -s http://localhost:8080/JSON/core/action/shutdown/ || true'
+                    sh 'curl -s http://localhost:8090/JSON/core/action/shutdown/ || true'
                 }
             }
         }

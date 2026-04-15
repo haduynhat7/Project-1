@@ -21,7 +21,7 @@ public class BrowserFactory {
 
                 // 1. Cấu hình "Trạm thu phí" ZAP
                 // Lưu ý: Cổng 8080 thường trùng với Jenkins, nên ZAP nên dùng 8090 hoặc 8081
-                String zapProxyAddress = "localhost:8080";
+                String zapProxyAddress = "localhost:8090";
                 Proxy proxy = new Proxy();
                 proxy.setHttpProxy(zapProxyAddress);
                 proxy.setSslProxy(zapProxyAddress);
