@@ -60,18 +60,18 @@ pipeline {
                 script {
                     echo 'Đang thiết lập và khởi động OWASP ZAP...'
 
-                    // 1. Tải ZAP nếu chưa có bản cài đặt cục bộ
+                    // 1. Tải ZAP 2.16.0 (Đã sửa link chuẩn)
                     sh '''
-                        if [ ! -d "ZAP_2.15.0" ]; then
-                            echo "Lần đầu chạy: Đang tải phần mềm OWASP ZAP..."
-                            wget -q https://github.com/zaproxy/zaproxy/releases/download/v2.15.0/ZAP_2.15.0_Linux.tar.gz
-                            tar -xzf ZAP_2.15.0_Linux.tar.gz
+                        if [ ! -d "ZAP_2.16.0" ]; then
+                            echo "Lần đầu chạy: Đang tải phần mềm OWASP ZAP 2.16.0..."
+                            wget -qO zap.tar.gz https://github.com/zaproxy/zaproxy/releases/download/v2.16.0/ZAP_2.16.0_Linux.tar.gz
+                            tar -xzf zap.tar.gz
                         fi
                     '''
 
-                    // 2. Chạy ZAP ngầm trực tiếp trên Linux (Không dùng Docker)
+                    // 2. Chạy ZAP ngầm
                     echo "Khởi động OWASP ZAP Proxy ở cổng 8080..."
-                    sh 'nohup ./ZAP_2.15.0/zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true > zap.log 2>&1 &'
+                    sh 'nohup ./ZAP_2.16.0/zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true > zap.log 2>&1 &'
 
                     echo 'Chờ 30 giây để công cụ ZAP khởi động lên hoàn toàn...'
                     sleep 30
@@ -99,7 +99,7 @@ pipeline {
                     sh 'curl -L http://localhost:8080/OTHER/core/other/htmlreport/? -o zap-report.html'
 
                     echo 'Ra lệnh tắt phần mềm OWASP ZAP...'
-                    // Gọi API lệnh tắt ZAP một cách an toàn, thêm "|| true" để Pipeline không báo lỗi nếu ZAP lỡ tắt rồi
+                    // Gọi API lệnh tắt ZAP
                     sh 'curl -s http://localhost:8080/JSON/core/action/shutdown/ || true'
                 }
             }
@@ -123,13 +123,13 @@ pipeline {
             )
         }
 
-        // Khối dọn dẹp cuối cùng: Rất quan trọng để các lần Build sau không bị kẹt cổng 8080
+        // Khối dọn dẹp cuối cùng
         cleanup {
             script {
                 echo 'Kiểm tra an toàn: Đảm bảo tiến trình ZAP đã được tắt hẳn...'
-                // Ép tắt mọi tiến trình Java liên quan đến ZAP đang chạy
+                // Đã cập nhật tên file jar theo bản 2.16.0
                 sh 'pkill -f zap.sh || true'
-                sh 'pkill -f zap-2.15.0.jar || true'
+                sh 'pkill -f zap-2.16.0.jar || true'
             }
         }
     }
