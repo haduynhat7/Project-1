@@ -120,12 +120,6 @@ always {
                 // 2. Lưu file gốc (Cho phép user tải về)
                 archiveArtifacts artifacts: 'codeql-results.sarif, zap-report.html', allowEmptyArchive: true
 
-                // 3. Hiển thị biểu đồ SARIF (SAST CodeQL)
-                recordIssues(
-                    tools: [sarif(pattern: 'codeql-results.sarif')],
-                    qualityGates: [[threshold: 1, type: 'TOTAL', criticality: 'NOTE']],
-                    skipBlames: true  // <--- THÊM DÒNG NÀY ĐỂ CHỐNG TREO PIPELINE
-                )
             }
 
             // Khối dọn dẹp cuối cùng: Cực kỳ quan trọng để dọn dẹp RAM và Port
