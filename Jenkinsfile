@@ -111,28 +111,29 @@ pipeline {
     }
 
     post {
-        always {
-            echo 'Đang tổng hợp và xuất các báo cáo lên giao diện Jenkins...'
+always {
+                echo 'Đang tổng hợp và xuất các báo cáo lên giao diện Jenkins...'
 
-            // 1. Báo cáo UI (Allure)
-            allure includeProperties: false, results: [[path: 'build/allure-results']]
+                // 1. Báo cáo UI (Allure)
+                allure includeProperties: false, results: [[path: 'build/allure-results']]
 
-            // 2. Lưu file gốc (Cho phép user tải về)
-            archiveArtifacts artifacts: 'codeql-results.sarif, zap-report.html', allowEmptyArchive: true
+                // 2. Lưu file gốc (Cho phép user tải về)
+                archiveArtifacts artifacts: 'codeql-results.sarif, zap-report.html', allowEmptyArchive: true
 
-            // 3. Hiển thị biểu đồ SARIF (SAST CodeQL)
-            recordIssues(
-                tools: [sarif(pattern: 'codeql-results.sarif')],
-                qualityGates: [[threshold: 1, type: 'TOTAL', criticality: 'NOTE']]
-            )
-        }
+                // 3. Hiển thị biểu đồ SARIF (SAST CodeQL)
+                recordIssues(
+                    tools: [sarif(pattern: 'codeql-results.sarif')],
+                    qualityGates: [[threshold: 1, type: 'TOTAL', criticality: 'NOTE']],
+                    skipBlames: true  // <--- THÊM DÒNG NÀY ĐỂ CHỐNG TREO PIPELINE
+                )
+            }
 
-        // Khối dọn dẹp cuối cùng: Cực kỳ quan trọng để dọn dẹp RAM và Port
-        cleanup {
-            script {
-                echo 'Kiểm tra an toàn: Đảm bảo tiến trình ZAP đã được tắt hẳn...'
-                sh 'pkill -f zap.sh || true'
-                sh 'pkill -f zap-2.16.0.jar || true'
+            // Khối dọn dẹp cuối cùng: Cực kỳ quan trọng để dọn dẹp RAM và Port
+            cleanup {
+                script {
+                    echo 'Kiểm tra an toàn: Đảm bảo tiến trình ZAP đã được tắt hẳn...'
+                    sh 'pkill -f zap.sh || true'
+                    sh 'pkill -f zap-2.16.0.jar || true'
             }
         }
     }
